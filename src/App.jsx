@@ -156,7 +156,7 @@ const App = () => {
             <p style={{marginTop: '15px', color: '#888'}}>A personalizar o teu modelo no servidor...</p>
           </div>
         ) : stlUrl ? (
-          <Scene3D url={stlUrl} />
+          <Scene3D stlUrl={stlUrl} />
         ) : (
           <div style={{color: '#444', textAlign: 'center'}}>
             <p>Configura os dados e clica em <b>Ver Preview</b></p>
