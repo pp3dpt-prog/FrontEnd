@@ -1,18 +1,18 @@
 /* App.css */
 body {
-  background-color: #f0f2f5; /* Fundo da página neutro */
+  background-color: #f4f7f9; /* Fundo cinza muito claro e limpo */
   margin: 0;
-  font-family: 'Inter', -apple-system, sans-serif;
+  font-family: 'Inter', sans-serif;
 }
 
 .app-container {
   display: flex;
   flex-direction: column;
-  padding: 40px; /* Espaço generoso no topo e laterais */
-  gap: 30px;
-  max-width: 1400px;
+  padding: 30px; /* Espaço nas laterais e topo */
+  gap: 25px;
+  max-width: 1600px; /* Mais largo para aproveitar monitores grandes */
   margin: 0 auto;
-  height: calc(100vh - 80px);
+  height: calc(100vh - 60px);
   box-sizing: border-box;
 }
 
@@ -20,66 +20,64 @@ body {
   .app-container { flex-direction: row; }
 }
 
-/* Moldura dos Controlos */
+/* Moldura dos Controlos (Esquerda) */
 .sidebar {
-  flex: 0 0 380px;
+  flex: 0 0 360px; /* Largura fixa para o menu */
   background: white;
-  border-radius: 24px;
-  padding: 30px;
+  border-radius: 20px;
+  padding: 25px;
   border: 1px solid #e2e8f0;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
 }
 
-/* Moldura do Visualizador */
+/* Moldura do Visualizador (Direita - A maior parte do ecrã) */
 .viewport {
-  flex: 1;
-  background: #ffffff; /* Fundo do visualizador muito claro */
-  border-radius: 24px;
+  flex: 1; /* Ocupa todo o espaço restante */
+  background: #ffffff; /* Fundo branco puro para o 3D */
+  border-radius: 20px;
   border: 1px solid #e2e8f0;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
-  position: relative;
-  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
 }
 
 .logo-container {
-  margin-bottom: 25px;
   text-align: center;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 15px;
 }
 
-.logo-text {
-  font-weight: 800;
-  font-size: 24px;
-  color: #1a202c;
-}
+.input-group { margin-bottom: 15px; }
 
-.logo-accent { color: #3b82f6; }
-
-.size-info {
+label {
+  display: block;
   font-size: 11px;
-  color: #718096;
-  margin-top: 8px;
-  text-align: center;
-  font-style: italic;
+  font-weight: 800;
+  color: #64748b;
+  margin-bottom: 5px;
+  text-transform: uppercase;
 }
 
-/* Ajustes de botões e inputs */
-.btn-size {
-  flex: 1;
-  padding: 12px;
-  border: 1px solid #edf2f7;
-  background: #f7fafc;
-  border-radius: 12px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: 0.2s;
+input[type="text"], select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
 }
 
-.btn-size.active {
-  background: #3b82f6;
-  color: white;
+/* Recuperação do Spinner */
+.spinner {
+  width: 40px; height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
 }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }

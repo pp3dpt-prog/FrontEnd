@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Scene3D from './components/Scene3D';
-import './App.css'; // Importa o novo CSS
+import './App.css';
 
 const App = () => {
   const [config, setConfig] = useState({
@@ -14,25 +14,21 @@ const App = () => {
   const [loading, setLoading] = useState(false);
   const [stlUrl, setStlUrl] = useState(null);
   const [podeComprar, setPodeComprar] = useState(false);
-
   const API_URL = import.meta.env.VITE_API_URL;
 
-  // REGRA: S não pode ter NFC e certas formas
+  // REGRA: Se tamanho for S, bloqueia NFC e formas complexas
   useEffect(() => {
     if (config.tamanho === 'S') {
-      let novaForma = config.forma;
-      // Se for S e estiver em Coração/Círculo, volta para Osso
-      if (config.forma === 'coracao' || config.forma === 'circulo') {
-        novaForma = 'osso';
-      }
-      setConfig(prev => ({ ...prev, temNFC: false, forma: novaForma }));
+      setConfig(prev => ({ 
+        ...prev, 
+        temNFC: false, 
+        forma: (prev.forma === 'coracao' || prev.forma === 'circulo') ? 'osso' : prev.forma 
+      }));
     }
   }, [config.tamanho]);
 
   const handleGerarPreview = async () => {
-    setLoading(true);
-    setStlUrl(null);
-    setPodeComprar(false);
+    setLoading(true); setStlUrl(null); setPodeComprar(false);
     try {
       const response = await fetch(`${API_URL}/gerar-tag`, {
         method: 'POST',
@@ -40,100 +36,87 @@ const App = () => {
         body: JSON.stringify(config)
       });
       const data = await response.json();
-      if (response.ok && data.url) {
-        setStlUrl(data.url);
-        setPodeComprar(true);
-      } else {
-        alert("Erro ao gerar modelo.");
-      }
-    } catch (e) {
-      alert("Erro de ligação.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleAdicionarAoCarrinho = () => {
-    console.log("Adicionado:", config);
-    alert(`Sucesso! A medalha do ${config.nome} foi guardada.`);
+      if (response.ok && data.url) { setStlUrl(data.url); setPodeComprar(true); }
+    } catch (e) { alert("Erro de ligação."); }
+    finally { setLoading(false); }
   };
 
   return (
-  <div className="app-container">
-    {/* COLUNA DE CONTROLOS */}
-    <div className="sidebar">
-      <div className="logo-container">
-        <div className="logo-text">PP3D<span className="logo-accent">.PT</span></div>
-        <p style={{fontSize: '10px', color: '#a0aec0', margin: 0}}>PERSONALIZAÇÃO 3D PROFISSIONAL</p>
-      </div>
-
-      <div className="input-group">
-        <label>NOME DO PET</label>
-        <input 
-          type="text" 
-          value={config.nome} 
-          onChange={e => setConfig({...config, nome: e.target.value.toUpperCase()})}
-        />
-      </div>
-
-      <div className="input-group">
-        <label>TAMANHO</label>
-        <div className="size-grid" style={{display: 'flex', gap: '10px'}}>
-          {['S', 'M', 'L'].map(t => (
-            <button 
-              key={t} 
-              className={`btn-size ${config.tamanho === t ? 'active' : ''}`}
-              onClick={() => setConfig({...config, tamanho: t})}
-            >
-              {t}
-            </button>
-          ))}
+    <div className="app-container">
+      <div className="sidebar">
+        <div className="logo-container">
+          <strong style={{fontSize: '20px'}}>PP3D<span style={{color: '#3b82f6'}}>.PT</span></strong>
         </div>
-        {/* Medidas dinâmicas conforme o tamanho */}
-        <div className="size-info">
-          {config.tamanho === 'S' && "Medida: 25mm x 15mm | Ideal para Gatos/Cães Mini"}
-          {config.tamanho === 'M' && "Medida: 40mm x 25mm | Ideal para Cães Médios"}
-          {config.tamanho === 'L' && "Medida: 55mm x 35mm | Ideal para Cães Grandes"}
+
+        <div className="input-group">
+          <label>NOME DO PET</label>
+          <input type="text" maxLength={12} value={config.nome} 
+            onChange={e => setConfig({...config, nome: e.target.value.toUpperCase()})} />
         </div>
-      </div>
 
-      <div className="input-group">
-        <label>FORMA</label>
-        <select value={config.forma} onChange={e => setConfig({...config, forma: e.target.value})}>
-          <option value="osso">🦴 Osso Clássico</option>
-          <option value="coracao" disabled={config.tamanho === 'S'}>❤️ Coração</option>
-          <option value="circulo" disabled={config.tamanho === 'S'}>🔘 Círculo</option>
-        </select>
-      </div>
+        <div className="input-group">
+          <label>TELEFONE (VERSO)</label>
+          <input type="text" disabled={config.temNFC} 
+            placeholder={config.temNFC ? "Gravado no Chip" : "Contacto"}
+            value={config.telefone} onChange={e => setConfig({...config, telefone: e.target.value})} />
+        </div>
 
-      <button className="btn-primary" onClick={handleGerarPreview} disabled={loading}>
-        {loading ? 'A PROCESSAR...' : 'VER PREVIEW 3D'}
-      </button>
+        <div className="input-group">
+          <label>TAMANHO</label>
+          <div style={{display: 'flex', gap: '5px'}}>
+            {['S', 'M', 'L'].map(t => (
+              <button key={t} className={`btn-size ${config.tamanho === t ? 'active' : ''}`}
+                onClick={() => setConfig({...config, tamanho: t})} style={{flex:1}}>{t}</button>
+            ))}
+          </div>
+          <div style={{fontSize: '10px', color: '#94a3b8', marginTop: '5px', textAlign: 'center'}}>
+            {config.tamanho === 'S' && "25mm x 15mm (Gatos)"}
+            {config.tamanho === 'M' && "40mm x 25mm (Cães Médios)"}
+            {config.tamanho === 'L' && "55mm x 35mm (Cães Grandes)"}
+          </div>
+        </div>
 
-      {podeComprar && (
-        <button className="btn-primary btn-cart" onClick={handleAdicionarAoCarrinho}>
-          🛒 ADICIONAR AO CARRINHO
+        <div className="input-group">
+          <label>FORMA</label>
+          <select value={config.forma} onChange={e => setConfig({...config, forma: e.target.value})}>
+            <option value="osso">🦴 Osso</option>
+            <option value="coracao" disabled={config.tamanho === 'S'}>❤️ Coração</option>
+            <option value="circulo" disabled={config.tamanho === 'S'}>🔘 Círculo</option>
+          </select>
+        </div>
+
+        <div className="input-group" style={{background: '#f1f5f9', padding: '10px', borderRadius: '8px'}}>
+          <label style={{display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', margin: 0}}>
+            <input type="checkbox" checked={config.temNFC} disabled={config.tamanho === 'S'}
+              onChange={e => setConfig({...config, temNFC: e.target.checked})} />
+            <span>ATURAR CHIP NFC</span>
+          </label>
+        </div>
+
+        <button className="btn-primary" onClick={handleGerarPreview} disabled={loading} 
+          style={{background: '#1e293b', color: 'white', padding: '12px', border: 'none', borderRadius: '8px', cursor: 'pointer'}}>
+          {loading ? 'A GERAR...' : 'VER PREVIEW 3D'}
         </button>
-      )}
-    </div>
 
-    {/* COLUNA DO VISUALIZADOR */}
-    <div className="viewport">
-      {loading ? (
-        <div className="loader-box">
-          <div className="spinner"></div>
-          <p>A desenhar a tua peça...</p>
-        </div>
-      ) : stlUrl ? (
-        <Scene3D stlUrl={stlUrl} />
-      ) : (
-        <div style={{color: '#a0aec0', textAlign: 'center'}}>
-          <p>Selecione as opções para visualizar o modelo real.</p>
-        </div>
-      )}
+        {podeComprar && (
+          <button className="btn-primary btn-cart" onClick={() => alert("Adicionado!")}
+            style={{background: '#f59e0b', marginTop: '10px', border: 'none', padding: '12px', borderRadius: '8px', fontWeight: 'bold'}}>
+            🛒 ADICIONAR AO CARRINHO
+          </button>
+        )}
+      </div>
+
+      <div className="viewport">
+        {loading ? (
+          <div style={{textAlign: 'center'}}><div className="spinner" style={{margin: '0 auto'}}></div><p>A processar...</p></div>
+        ) : stlUrl ? (
+          <Scene3D stlUrl={stlUrl} />
+        ) : (
+          <div style={{color: '#cbd5e1', textAlign: 'center'}}><p>O modelo aparecerá aqui.</p></div>
+        )}
+      </div>
     </div>
-  </div>
-);
-}
+  );
+};
 
 export default App;
