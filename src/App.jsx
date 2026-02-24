@@ -182,7 +182,7 @@ const App = () => {
 // --- ESTILOS ---
 const containerStyle = { display: 'flex', height: '100vh', background: '#050505', color: 'white', fontFamily: 'Inter, sans-serif' };
 const sidebarStyle = { width: '340px', padding: '30px', borderRight: '1px solid #222', display: 'flex', flexDirection: 'column', gap: '5px', overflowY: 'auto' };
-const viewportStyle = { flex: 1, position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center' };
+const viewportStyle = { background: '#666', flex: 1, position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center' };
 const titleStyle = { fontSize: '22px', fontWeight: '800', marginBottom: '20px', letterSpacing: '-1px' };
 const inputGroup = { marginBottom: '18px' };
 const labelStyle = { display: 'block', fontSize: '10px', color: '#666', marginBottom: '6px', fontWeight: 'bold', letterSpacing: '1px' };
