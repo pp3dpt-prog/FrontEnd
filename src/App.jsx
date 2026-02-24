@@ -59,97 +59,81 @@ const App = () => {
   };
 
   return (
-    <div className="app-container">
-      <div className="sidebar">
-        <h1>PetTag <span style={{color: '#0071e3'}}>3D</span></h1>
-        
-        <div className="input-group">
-          <label>Nome do Pet</label>
-          <input 
-            type="text" 
-            maxLength={12} 
-            value={config.nome} 
-            onChange={e => setConfig({...config, nome: e.target.value.toUpperCase()})} 
-          />
-        </div>
+  <div className="app-container">
+    {/* COLUNA DE CONTROLOS */}
+    <div className="sidebar">
+      <div className="logo-container">
+        <div className="logo-text">PP3D<span className="logo-accent">.PT</span></div>
+        <p style={{fontSize: '10px', color: '#a0aec0', margin: 0}}>PERSONALIZAÇÃO 3D PROFISSIONAL</p>
+      </div>
 
-        <div className="input-group">
-          <label>Telefone (Verso)</label>
-          <input 
-            type="text" 
-            disabled={config.temNFC}
-            placeholder={config.temNFC ? "Gravado no Chip" : "Teu contacto"}
-            value={config.telefone} 
-            onChange={e => setConfig({...config, telefone: e.target.value})} 
-          />
-        </div>
+      <div className="input-group">
+        <label>NOME DO PET</label>
+        <input 
+          type="text" 
+          value={config.nome} 
+          onChange={e => setConfig({...config, nome: e.target.value.toUpperCase()})}
+        />
+      </div>
 
-        <div className="input-group">
-          <label>Tamanho</label>
-          <div className="size-grid">
-            {['S', 'M', 'L'].map(t => (
-              <button 
-                key={t} 
-                className={`btn-size ${config.tamanho === t ? 'active' : ''}`}
-                onClick={() => setConfig({...config, tamanho: t})}
-              >{t}</button>
-            ))}
-          </div>
+      <div className="input-group">
+        <label>TAMANHO</label>
+        <div className="size-grid" style={{display: 'flex', gap: '10px'}}>
+          {['S', 'M', 'L'].map(t => (
+            <button 
+              key={t} 
+              className={`btn-size ${config.tamanho === t ? 'active' : ''}`}
+              onClick={() => setConfig({...config, tamanho: t})}
+            >
+              {t}
+            </button>
+          ))}
         </div>
-
-        <div className="input-group">
-          <label>Forma</label>
-          <select 
-            value={config.forma} 
-            onChange={e => setConfig({...config, forma: e.target.value})}
-          >
-            <option value="osso">🦴 Osso</option>
-            <option value="coracao" disabled={config.tamanho === 'S'}>❤️ Coração (Apenas M/L)</option>
-            <option value="circulo" disabled={config.tamanho === 'S'}>🔘 Círculo (Apenas M/L)</option>
-          </select>
+        {/* Medidas dinâmicas conforme o tamanho */}
+        <div className="size-info">
+          {config.tamanho === 'S' && "Medida: 25mm x 15mm | Ideal para Gatos/Cães Mini"}
+          {config.tamanho === 'M' && "Medida: 40mm x 25mm | Ideal para Cães Médios"}
+          {config.tamanho === 'L' && "Medida: 55mm x 35mm | Ideal para Cães Grandes"}
         </div>
+      </div>
 
-        <div className="input-group">
-          <label>Tecnologia</label>
-          <div style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
-            <input 
-              type="checkbox" 
-              checked={config.temNFC} 
-              disabled={config.tamanho === 'S'}
-              onChange={e => setConfig({...config, temNFC: e.target.checked})}
-            />
-            <span style={{fontSize: '14px'}}>Incluir Chip NFC</span>
-          </div>
-          {config.tamanho === 'S' && <p className="restriction-text">* S não suporta NFC.</p>}
-        </div>
+      <div className="input-group">
+        <label>FORMA</label>
+        <select value={config.forma} onChange={e => setConfig({...config, forma: e.target.value})}>
+          <option value="osso">🦴 Osso Clássico</option>
+          <option value="coracao" disabled={config.tamanho === 'S'}>❤️ Coração</option>
+          <option value="circulo" disabled={config.tamanho === 'S'}>🔘 Círculo</option>
+        </select>
+      </div>
 
-        <button className="btn-primary" onClick={handleGerarPreview} disabled={loading}>
-          {loading ? 'A PERSONALIZAR...' : 'VISUALIZAR EM 3D'}
+      <button className="btn-primary" onClick={handleGerarPreview} disabled={loading}>
+        {loading ? 'A PROCESSAR...' : 'VER PREVIEW 3D'}
+      </button>
+
+      {podeComprar && (
+        <button className="btn-primary btn-cart" onClick={handleAdicionarAoCarrinho}>
+          🛒 ADICIONAR AO CARRINHO
         </button>
-
-        {podeComprar && (
-          <button className="btn-primary btn-cart" onClick={handleAdicionarAoCarrinho}>
-            🛒 ADICIONAR AO CARRINHO
-          </button>
-        )}
-      </div>
-
-      <div className="viewport">
-        {loading ? (
-          <div className="loader-box">
-            <div className="spinner"></div>
-            <p>A personalizar a tua PetTag...</p>
-          </div>
-        ) : stlUrl ? (
-          <Scene3D stlUrl={stlUrl} />
-        ) : (
-          <div className="placeholder-text">
-            <p>Configura os detalhes e clica em <b>Visualizar</b></p>
-          </div>
-        )}
-      </div>
+      )}
     </div>
-  );
-};
+
+    {/* COLUNA DO VISUALIZADOR */}
+    <div className="viewport">
+      {loading ? (
+        <div className="loader-box">
+          <div className="spinner"></div>
+          <p>A desenhar a tua peça...</p>
+        </div>
+      ) : stlUrl ? (
+        <Scene3D stlUrl={stlUrl} />
+      ) : (
+        <div style={{color: '#a0aec0', textAlign: 'center'}}>
+          <p>Selecione as opções para visualizar o modelo real.</p>
+        </div>
+      )}
+    </div>
+  </div>
+);
+}
 
 export default App;
