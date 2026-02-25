@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import emailjs from '@emailjs/browser'; 
+import emailjs from '@emailjs/browser';
 import Scene3D from './components/Scene3D';
 import './App.css';
 
 const App = () => {
-  // 1. ESTADOS (Mantidos exatamente como os teus)
   const [config, setConfig] = useState({
     nome: 'BOBI',
     telefone: '912345678',
@@ -17,15 +16,15 @@ const App = () => {
   const [stlUrl, setStlUrl] = useState(null);
   const [podeComprar, setPodeComprar] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [tipoForm, setTipoForm] = useState('orcamento'); 
-  
+  const [tipoForm, setTipoForm] = useState('orcamento');
+
   const [formDados, setFormDados] = useState({
     donoNome: '', donoTelefone: '', donoEmail: '', nif: '', morada: '',
     petRaca: '', petNascimento: '', petChip: '', petVacinas: '', 
     petVet: '', obs: '', contactoEmergencia: ''
   });
 
-  // 2. LÓGICA DE NEGÓCIO (Mantida a tua restrição do Tamanho S)
+  // TUA LÓGICA DE NEGÓCIO: Mantida intacta
   useEffect(() => {
     if (config.tamanho === 'S') {
       setConfig(prev => ({ 
@@ -36,7 +35,7 @@ const App = () => {
     }
   }, [config.tamanho]);
 
-  // 3. FUNÇÃO GERAR PREVIEW (Movida para o sítio certo)
+  // FUNÇÃO 1: Gerar Preview (Movida para aqui, fora do return)
   const handleGerarPreview = async () => {
     setLoading(true);
     setStlUrl(null);
@@ -61,7 +60,7 @@ const App = () => {
     }
   };
 
-  // 4. FUNÇÃO DE ENVIO (WhatsApp + EmailJS)
+  // FUNÇÃO 2: Finalizar Envio (WhatsApp + EmailJS)
   const finalizarEnvio = async (e) => {
     e.preventDefault();
 
@@ -84,19 +83,13 @@ const App = () => {
       stl_url: stlUrl
     };
 
-    // Envio do Email para Produção
     emailjs.send(
-      import.meta.env.VITE_EMAILJS_SERVICE_ID, 
-      import.meta.env.VITE_EMAILJS_TEMPLATE_ID, 
-      templateParams, 
+      import.meta.env.VITE_EMAILJS_SERVICE_ID,
+      import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+      templateParams,
       import.meta.env.VITE_EMAILJS_PUBLIC_KEY
-    ).then((response) => {
-       console.log('EMAIL ENVIADO!', response.status);
-    }, (err) => {
-       console.log('ERRO EMAILJS...', err);
-    });
-        
-    // Mensagem WhatsApp para o Cliente
+    ).then(() => console.log("Email enviado!"), (err) => console.log("Erro email:", err));
+
     const msg = `*PP3D.PT - NOVO PEDIDO DE ${tipoForm.toUpperCase()}*%0A%0A` +
       `*Dono:* ${formDados.donoNome}%0A` +
       `*Pet:* ${config.nome}%0A` +
@@ -107,7 +100,6 @@ const App = () => {
     setShowModal(false);
   };
 
-  // 5. INTERFACE (O Teu Visual)
   return (
     <div className="app-container">
       <div className="sidebar">
@@ -116,6 +108,7 @@ const App = () => {
            <h2>PP3D<span>.PT</span></h2>
         </div>
 
+        {/* INPUTS DE CONFIGURAÇÃO - Mantidos exatamente como tinhas */}
         <div className="input-block">
           <label>NOME DO PET (FRENTE)</label>
           <input type="text" maxLength={12} value={config.nome} 
@@ -149,31 +142,28 @@ const App = () => {
         </div>
 
         <div className={`nfc-panel ${config.tamanho === 'S' ? 'disabled' : ''}`} 
-             style={{opacity: config.tamanho === 'S' ? 0.5 : 1, marginBottom: '15px'}}>
+             style={{opacity: config.tamanho === 'S' ? 0.5 : 1, marginBottom: '20px'}}>
           <input type="checkbox" id="nfc-toggle" checked={config.temNFC} disabled={config.tamanho === 'S'}
             onChange={e => setConfig({...config, temNFC: e.target.checked})} />
-          <label htmlFor="nfc-toggle" style={{margin: 0, cursor: 'pointer', fontSize: '12px'}}>
+          <label htmlFor="nfc-toggle" style={{cursor: 'pointer', fontSize: '12px'}}>
             ATIVAR CHIP NFC INTEGRADO
           </label>
         </div>
 
+        {/* BOTÃO QUE CHAMA A FUNÇÃO CORRIGIDA */}
         <button className="btn-main" onClick={handleGerarPreview} disabled={loading}>
           {loading ? 'A GERAR...' : 'VER PREVIEW 3D'}
         </button>
 
         {podeComprar && (
-          <button className="btn-buy" onClick={() => setShowModal(true)} style={{marginTop: '10px'}}>
+          <button className="btn-buy" style={{marginTop: '10px'}} onClick={() => { setTipoForm('orcamento'); setShowModal(true); }}>
             🛒 FINALIZAR PEDIDO / ORÇAMENTO
           </button>
         )}
 
-        <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
-          <button className="btn-secondary" onClick={() => { setTipoForm('info'); setShowModal(true); }}>
-            ℹ️ Informação
-          </button>
-          <button className="btn-secondary" onClick={() => { setTipoForm('sugestao'); setShowModal(true); }}>
-            💡 Sugestão
-          </button>
+        <div className="extra-buttons" style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
+          <button className="btn-secondary" onClick={() => { setTipoForm('info'); setShowModal(true); }}>ℹ️ Info</button>
+          <button className="btn-secondary" onClick={() => { setTipoForm('sugestao'); setShowModal(true); }}>💡 Sugestão</button>
         </div>
       </div>
 
@@ -181,35 +171,28 @@ const App = () => {
          {stlUrl ? <Scene3D stlUrl={stlUrl} /> : <p>Configura a tua PetTag</p>}
       </div>
 
+      {/* MODAL COM OS TEUS CAMPOS NFC COMPLETOS */}
       {showModal && (
         <div className="modal-overlay">
           <div className="modal-content">
             <h3>{tipoForm === 'orcamento' ? 'Dados para Faturação e NFC' : 'Contacto'}</h3>
             <form onSubmit={finalizarEnvio} className="grid-form">
-              <input type="text" placeholder="Nome do Dono" required 
-                onChange={e => setFormDados({...formDados, donoNome: e.target.value})} />
-              <input type="text" placeholder="NIF (Opcional)" 
-                onChange={e => setFormDados({...formDados, nif: e.target.value})} />
-              <input type="email" placeholder="Teu Email" className="full-width" required
-                onChange={e => setFormDados({...formDados, donoEmail: e.target.value})} />
-              <input type="text" placeholder="Morada Completa de Envio" className="full-width"
-                onChange={e => setFormDados({...formDados, morada: e.target.value})} />
+              <input type="text" placeholder="Nome do Dono" required onChange={e => setFormDados({...formDados, donoNome: e.target.value})} />
+              <input type="text" placeholder="NIF (Opcional)" onChange={e => setFormDados({...formDados, nif: e.target.value})} />
+              <input type="email" placeholder="Teu Email" className="full-width" required onChange={e => setFormDados({...formDados, donoEmail: e.target.value})} />
+              <input type="text" placeholder="Morada Completa" className="full-width" onChange={e => setFormDados({...formDados, morada: e.target.value})} />
 
               {config.temNFC && tipoForm === 'orcamento' && (
                 <>
-                  <h4 className="full-width">Ficha do Pet (Cartão Eletrónico)</h4>
+                  <h4 className="full-width">Ficha do Pet</h4>
                   <input type="text" placeholder="Raça" onChange={e => setFormDados({...formDados, petRaca: e.target.value})} />
                   <input type="date" onChange={e => setFormDados({...formDados, petNascimento: e.target.value})} />
-                  <input type="text" placeholder="Nº Chip Veterinário" onChange={e => setFormDados({...formDados, petChip: e.target.value})} />
-                  <input type="text" placeholder="Contacto p/ Botão Chamada" onChange={e => setFormDados({...formDados, contactoEmergencia: e.target.value})} />
-                  <textarea placeholder="Dados Veterinários / Alergias" className="full-width"
-                    onChange={e => setFormDados({...formDados, petVet: e.target.value})} />
+                  <input type="text" placeholder="Nº Chip" onChange={e => setFormDados({...formDados, petChip: e.target.value})} />
+                  <input type="text" placeholder="Telefone Emergência" onChange={e => setFormDados({...formDados, contactoEmergencia: e.target.value})} />
+                  <textarea placeholder="Veterinário / Alergias" className="full-width" onChange={e => setFormDados({...formDados, petVet: e.target.value})} />
                 </>
               )}
-
-              <textarea placeholder="Observações Adicionais" className="full-width"
-                onChange={e => setFormDados({...formDados, obs: e.target.value})} />
-
+              <textarea placeholder="Observações" className="full-width" onChange={e => setFormDados({...formDados, obs: e.target.value})} />
               <div className="modal-actions full-width">
                 <button type="button" onClick={() => setShowModal(false)}>Cancelar</button>
                 <button type="submit" className="btn-confirm">Enviar Pedido</button>
