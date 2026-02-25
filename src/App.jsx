@@ -4,7 +4,7 @@ import Scene3D from './components/Scene3D';
 import './App.css';
 
 const App = () => {
-  // 1. ESTADOS ORIGINAIS (PP3D.PT)
+  // 1. ESTADOS (Mantidos exatamente como os teus)
   const [config, setConfig] = useState({
     nome: 'BOBI',
     telefone: '912345678',
@@ -25,7 +25,7 @@ const App = () => {
     petVet: '', obs: '', contactoEmergencia: ''
   });
 
-  // 2. LÓGICA DE NEGÓCIO (Restrições de Tamanho S)
+  // 2. LÓGICA DE NEGÓCIO (Mantida a tua restrição do Tamanho S)
   useEffect(() => {
     if (config.tamanho === 'S') {
       setConfig(prev => ({ 
@@ -36,7 +36,7 @@ const App = () => {
     }
   }, [config.tamanho]);
 
-  // 3. FUNÇÃO DE PREVIEW (Movida para fora do return para corrigir o ReferenceError)
+  // 3. FUNÇÃO GERAR PREVIEW (Movida para o sítio certo)
   const handleGerarPreview = async () => {
     setLoading(true);
     setStlUrl(null);
@@ -61,7 +61,7 @@ const App = () => {
     }
   };
 
-  // 4. FUNÇÃO DE ENVIO DUPLO (WhatsApp + EmailJS)
+  // 4. FUNÇÃO DE ENVIO (WhatsApp + EmailJS)
   const finalizarEnvio = async (e) => {
     e.preventDefault();
 
@@ -84,6 +84,7 @@ const App = () => {
       stl_url: stlUrl
     };
 
+    // Envio do Email para Produção
     emailjs.send(
       import.meta.env.VITE_EMAILJS_SERVICE_ID, 
       import.meta.env.VITE_EMAILJS_TEMPLATE_ID, 
@@ -95,6 +96,7 @@ const App = () => {
        console.log('ERRO EMAILJS...', err);
     });
         
+    // Mensagem WhatsApp para o Cliente
     const msg = `*PP3D.PT - NOVO PEDIDO DE ${tipoForm.toUpperCase()}*%0A%0A` +
       `*Dono:* ${formDados.donoNome}%0A` +
       `*Pet:* ${config.nome}%0A` +
@@ -105,7 +107,7 @@ const App = () => {
     setShowModal(false);
   };
 
-  // 5. RENDERIZAÇÃO DA INTERFACE (Manteve-se tudo!)
+  // 5. INTERFACE (O Teu Visual)
   return (
     <div className="app-container">
       <div className="sidebar">
@@ -147,10 +149,10 @@ const App = () => {
         </div>
 
         <div className={`nfc-panel ${config.tamanho === 'S' ? 'disabled' : ''}`} 
-             style={{opacity: config.tamanho === 'S' ? 0.5 : 1, marginBottom: '20px'}}>
+             style={{opacity: config.tamanho === 'S' ? 0.5 : 1, marginBottom: '15px'}}>
           <input type="checkbox" id="nfc-toggle" checked={config.temNFC} disabled={config.tamanho === 'S'}
             onChange={e => setConfig({...config, temNFC: e.target.checked})} />
-          <label htmlFor="nfc-toggle" style={{cursor: 'pointer', fontSize: '12px'}}>
+          <label htmlFor="nfc-toggle" style={{margin: 0, cursor: 'pointer', fontSize: '12px'}}>
             ATIVAR CHIP NFC INTEGRADO
           </label>
         </div>
@@ -160,14 +162,14 @@ const App = () => {
         </button>
 
         {podeComprar && (
-          <button className="btn-buy" style={{marginTop: '10px'}} onClick={() => { setTipoForm('orcamento'); setShowModal(true); }}>
+          <button className="btn-buy" onClick={() => setShowModal(true)} style={{marginTop: '10px'}}>
             🛒 FINALIZAR PEDIDO / ORÇAMENTO
           </button>
         )}
 
         <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
           <button className="btn-secondary" onClick={() => { setTipoForm('info'); setShowModal(true); }}>
-            ℹ️ Info
+            ℹ️ Informação
           </button>
           <button className="btn-secondary" onClick={() => { setTipoForm('sugestao'); setShowModal(true); }}>
             💡 Sugestão
