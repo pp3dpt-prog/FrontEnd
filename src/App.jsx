@@ -1,38 +1,32 @@
 import React, { useState, useEffect } from 'react';
-import emailjs from '@emailjs/browser'; // Certifica-te de que instalaste: npm install @emailjs/browser
+import emailjs from '@emailjs/browser'; 
 import Scene3D from './components/Scene3D';
 import './App.css';
 
 const App = () => {
-    const [config, setConfig] = useState({
-      nome: 'BOBI',
-      telefone: '912345678',
-      forma: 'osso',
-      tamanho: 'M',
-      temNFC: false
-    });
-
+  const [config, setConfig] = useState({
+    nome: 'BOBI',
+    telefone: '912345678',
+    forma: 'osso',
+    tamanho: 'M',
+    temNFC: false
+  });
 
   const [loading, setLoading] = useState(false);
   const [stlUrl, setStlUrl] = useState(null);
   const [podeComprar, setPodeComprar] = useState(false);
-  const API_URL = import.meta.env.VITE_API_URL;
   const [showModal, setShowModal] = useState(false);
-  const [tipoForm, setTipoForm] = useState('orcamento'); // orcamento, info, sugestao
-  
+  const [tipoForm, setTipoForm] = useState('orcamento');
 
-  // NOVOS ESTADOS: Modal e Dados do Pedido
-  
   const [formDados, setFormDados] = useState({
     donoNome: '', donoTelefone: '', donoEmail: '', nif: '', morada: '',
     petRaca: '', petNascimento: '', petChip: '', petVacinas: '', 
     petVet: '', obs: '', contactoEmergencia: ''
   });
 
-  // LÓGICA DE NEGÓCIO: Restrições de Produção
+  // LÓGICA DE NEGÓCIO: Mantida conforme o teu código
   useEffect(() => {
     if (config.tamanho === 'S') {
-      // S é demasiado pequeno para o chip ou formas complexas
       setConfig(prev => ({ 
         ...prev, 
         temNFC: false, 
@@ -41,52 +35,67 @@ const App = () => {
     }
   }, [config.tamanho]);
 
-  // FUNÇÃO DE ENVIO DUPLO (WhatsApp + Email Invisível)
+  // FUNÇÃO 1: Gerar Preview (Movida para fora do return)
+  const handleGerarPreview = async () => {
+    setLoading(true);
+    setStlUrl(null);
+    setPodeComprar(false);
+    
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/gerar-tag`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(config)
+      });
+      const data = await response.json();
+      if (response.ok && data.url) {
+        setStlUrl(data.url);
+        setPodeComprar(true);
+      }
+    } catch (error) {
+      console.error("Erro ao gerar preview:", error);
+      alert("Erro de ligação ao servidor.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // FUNÇÃO 2: Envio Duplo (Corrigida a estrutura interna)
   const finalizarEnvio = async (e) => {
     e.preventDefault();
 
-    // 1. Envio Invisível do STL para ti (Produção)
-    const enviarEmailProducao = (linkStl) => {
-      // Chamada das variáveis do .env
-      const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
-      const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
-      const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
+    // 1. Envio Invisível via EmailJS
+    const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+    const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+    const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
 
-      const templateParams = {
-        // Dados do Dono (Conforme o teu template)
-        dono_nome: formDados.donoNome,
-        dono_email: formDados.donoEmail,
-        dono_telefone: formDados.donoTelefone,
-        nif: formDados.nif,
-        morada: formDados.morada,
+    const templateParams = {
+      dono_nome: formDados.donoNome,
+      dono_email: formDados.donoEmail,
+      dono_telefone: formDados.donoTelefone,
+      nif: formDados.nif,
+      morada: formDados.morada,
+      nome_pet: config.nome,
+      pet_raca: formDados.petRaca,
+      pet_nascimento: formDados.petNascimento,
+      pet_chip: formDados.petChip,
+      pet_vacinas: formDados.petVacinas,
+      pet_vet: formDados.petVet,
+      tamanho: config.tamanho,
+      forma: config.forma,
+      tem_nfc: config.temNFC ? "Sim" : "Não",
+      contacto_emergencia: formDados.contactoEmergencia,
+      stl_url: stlUrl
+    };
 
-        // Dados do Pet
-        nome_pet: config.nome,
-        pet_raca: formDados.petRaca,
-        pet_nascimento: formDados.petNascimento,
-        pet_chip: formDados.petChip,
-        pet_vacinas: formDados.petVacinas,
-        pet_vet: formDados.petVet,
+    emailjs.send(serviceId, templateId, templateParams, publicKey)
+      .then((response) => {
+        console.log('EMAIL ENVIADO!', response.status);
+      }, (err) => {
+        console.log('ERRO EMAILJS:', err);
+      });
 
-        // Configuração Técnica
-        tamanho: config.tamanho,
-        forma: config.forma,
-        tem_nfc: config.temNFC ? "Sim" : "Não",
-        contacto_emergencia: formDados.contactoEmergencia,
-        
-        // O link invisível para o teu trabalho
-        stl_url: linkStl || stlUrl
-      };
-
-      emailjs.send(serviceId, templateId, templateParams, publicKey)
-    .then((response) => {
-       console.log('SUCESSO!', response.status, response.text);
-    }, (err) => {
-       console.log('ERRO NO EMAILJS...', err);
-    });
-  };  
-        
-    // 2. Mensagem para o Cliente (WhatsApp)
+    // 2. Mensagem WhatsApp para o Cliente
     const msg = `*PP3D.PT - NOVO PEDIDO DE ${tipoForm.toUpperCase()}*%0A%0A` +
       `*Dono:* ${formDados.donoNome}%0A` +
       `*Pet:* ${config.nome}%0A` +
@@ -99,7 +108,6 @@ const App = () => {
 
   return (
     <div className="app-container">
-      {/* SIDEBAR COM LOGO */}
       <div className="sidebar">
         <div className="logo-header">
            <img src="/logo_pp3d.webp" alt="PP3D.PT" className="main-logo" />
@@ -127,11 +135,6 @@ const App = () => {
                 onClick={() => setConfig({...config, tamanho: t})}>{t}</button>
             ))}
           </div>
-          <div style={{fontSize: '10px', color: '#94a3b8', textAlign: 'center'}}>
-            {config.tamanho === 'S' && "25mm x 15mm - Ideal para Cães Pequenos"}
-            {config.tamanho === 'M' && "40mm x 25mm - Ideal para Cães Médios"}
-            {config.tamanho === 'L' && "55mm x 35mm - Ideal para Cães Grandes"}
-          </div>
         </div>
 
         <div className="input-block">
@@ -144,7 +147,7 @@ const App = () => {
         </div>
 
         <div className={`nfc-panel ${config.tamanho === 'S' ? 'disabled' : ''}`} 
-             style={{opacity: config.tamanho === 'S' ? 0.5 : 1}}>
+             style={{opacity: config.tamanho === 'S' ? 0.5 : 1, marginBottom: '20px'}}>
           <input type="checkbox" id="nfc-toggle" checked={config.temNFC} disabled={config.tamanho === 'S'}
             onChange={e => setConfig({...config, temNFC: e.target.checked})} />
           <label htmlFor="nfc-toggle" style={{margin: 0, cursor: 'pointer', fontSize: '12px'}}>
@@ -153,36 +156,29 @@ const App = () => {
         </div>
 
         <button className="btn-main" onClick={handleGerarPreview} disabled={loading}>
-          {loading ? 'A GERAR MODELO...' : 'VER PREVIEW 3D'}
+          {loading ? 'A GERAR...' : 'VER PREVIEW 3D'}
         </button>
 
-        <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
-          <button className="btn-secondary" onClick={() => { setTipoForm('info'); setShowModal(true); }}>
-            Pedir Informação
-          </button>
-          <button className="btn-secondary" onClick={() => { setTipoForm('sugestao'); setShowModal(true); }}>
-            Dar Sugestão
-          </button>
-        </div>
-
         {podeComprar && (
-          <button className="btn-buy" onClick={() => setShowModal(true)}>
+          <button className="btn-buy" style={{marginTop: '10px'}} onClick={() => { setTipoForm('orcamento'); setShowModal(true); }}>
             🛒 FINALIZAR PEDIDO / ORÇAMENTO
           </button>
         )}
 
-        <div className="extra-buttons">
-          <button onClick={() => { setTipoForm('info'); setShowModal(true); }}>ℹ️ Informação</button>
-          <button onClick={() => { setTipoForm('sugestao'); setShowModal(true); }}>💡 Sugestão</button>
+        <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
+          <button className="btn-secondary" onClick={() => { setTipoForm('info'); setShowModal(true); }}>
+            ℹ️ Info
+          </button>
+          <button className="btn-secondary" onClick={() => { setTipoForm('sugestao'); setShowModal(true); }}>
+            💡 Sugestão
+          </button>
         </div>
       </div>
 
       <div className="viewport">
-         {/* Visualizador 3D */}
          {stlUrl ? <Scene3D stlUrl={stlUrl} /> : <p>Configura a tua PetTag</p>}
       </div>
 
-      {/* MODAL PROFISSIONAL */}
       {showModal && (
         <div className="modal-overlay">
           <div className="modal-content">
@@ -197,14 +193,13 @@ const App = () => {
               <input type="text" placeholder="Morada Completa de Envio" className="full-width"
                 onChange={e => setFormDados({...formDados, morada: e.target.value})} />
 
-              {/* CAMPOS NFC - Só aparecem se o chip estiver ativo */}
               {config.temNFC && tipoForm === 'orcamento' && (
                 <>
                   <h4 className="full-width">Ficha do Pet (Cartão Eletrónico)</h4>
                   <input type="text" placeholder="Raça" onChange={e => setFormDados({...formDados, petRaca: e.target.value})} />
-                  <input type="date" title="Data de Nascimento" onChange={e => setFormDados({...formDados, petNascimento: e.target.value})} />
+                  <input type="date" onChange={e => setFormDados({...formDados, petNascimento: e.target.value})} />
                   <input type="text" placeholder="Nº Chip Veterinário" onChange={e => setFormDados({...formDados, petChip: e.target.value})} />
-                  <input type="text" placeholder="Contacto p/ Botão Chamada" onChange={e => setFormDados({...formDados, contactoEmergencia: e.target.value})} />
+                  <input type="text" placeholder="Contacto Botão Chamada" onChange={e => setFormDados({...formDados, contactoEmergencia: e.target.value})} />
                   <textarea placeholder="Dados Veterinários / Alergias" className="full-width"
                     onChange={e => setFormDados({...formDados, vet: e.target.value})} />
                 </>
@@ -215,7 +210,7 @@ const App = () => {
 
               <div className="modal-actions full-width">
                 <button type="button" onClick={() => setShowModal(false)}>Cancelar</button>
-                <button type="submit" className="btn-confirm">Enviar para WhatsApp</button>
+                <button type="submit" className="btn-confirm">Enviar Pedido</button>
               </div>
             </form>
           </div>
