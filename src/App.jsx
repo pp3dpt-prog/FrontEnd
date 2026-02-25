@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import emailjs from '@emailjs/browser';
+import emailjs from '@emailjs/browser'; 
 import Scene3D from './components/Scene3D';
 import './App.css';
 
 const App = () => {
+  // 1. ESTADOS ORIGINAIS (PP3D.PT)
   const [config, setConfig] = useState({
     nome: 'BOBI',
     telefone: '912345678',
@@ -16,15 +17,15 @@ const App = () => {
   const [stlUrl, setStlUrl] = useState(null);
   const [podeComprar, setPodeComprar] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [tipoForm, setTipoForm] = useState('orcamento');
-
+  const [tipoForm, setTipoForm] = useState('orcamento'); 
+  
   const [formDados, setFormDados] = useState({
     donoNome: '', donoTelefone: '', donoEmail: '', nif: '', morada: '',
     petRaca: '', petNascimento: '', petChip: '', petVacinas: '', 
     petVet: '', obs: '', contactoEmergencia: ''
   });
 
-  // TUA LÓGICA DE NEGÓCIO ORIGINAL
+  // 2. LÓGICA DE NEGÓCIO (Restrições de Tamanho S)
   useEffect(() => {
     if (config.tamanho === 'S') {
       setConfig(prev => ({ 
@@ -35,7 +36,7 @@ const App = () => {
     }
   }, [config.tamanho]);
 
-  // FUNÇÃO DE PREVIEW (Agora no lugar correto para evitar o ReferenceError)
+  // 3. FUNÇÃO DE PREVIEW (Movida para fora do return para corrigir o ReferenceError)
   const handleGerarPreview = async () => {
     setLoading(true);
     setStlUrl(null);
@@ -60,7 +61,7 @@ const App = () => {
     }
   };
 
-  // FUNÇÃO DE ENVIO (Com todos os teus parâmetros do template EmailJS)
+  // 4. FUNÇÃO DE ENVIO DUPLO (WhatsApp + EmailJS)
   const finalizarEnvio = async (e) => {
     e.preventDefault();
 
@@ -84,12 +85,16 @@ const App = () => {
     };
 
     emailjs.send(
-      import.meta.env.VITE_EMAILJS_SERVICE_ID,
-      import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
-      templateParams,
+      import.meta.env.VITE_EMAILJS_SERVICE_ID, 
+      import.meta.env.VITE_EMAILJS_TEMPLATE_ID, 
+      templateParams, 
       import.meta.env.VITE_EMAILJS_PUBLIC_KEY
-    ).then(() => console.log("Email enviado!")).catch(err => console.log("Erro:", err));
-
+    ).then((response) => {
+       console.log('EMAIL ENVIADO!', response.status);
+    }, (err) => {
+       console.log('ERRO EMAILJS...', err);
+    });
+        
     const msg = `*PP3D.PT - NOVO PEDIDO DE ${tipoForm.toUpperCase()}*%0A%0A` +
       `*Dono:* ${formDados.donoNome}%0A` +
       `*Pet:* ${config.nome}%0A` +
@@ -100,6 +105,7 @@ const App = () => {
     setShowModal(false);
   };
 
+  // 5. RENDERIZAÇÃO DA INTERFACE (Manteve-se tudo!)
   return (
     <div className="app-container">
       <div className="sidebar">
@@ -141,7 +147,7 @@ const App = () => {
         </div>
 
         <div className={`nfc-panel ${config.tamanho === 'S' ? 'disabled' : ''}`} 
-             style={{opacity: config.tamanho === 'S' ? 0.5 : 1}}>
+             style={{opacity: config.tamanho === 'S' ? 0.5 : 1, marginBottom: '20px'}}>
           <input type="checkbox" id="nfc-toggle" checked={config.temNFC} disabled={config.tamanho === 'S'}
             onChange={e => setConfig({...config, temNFC: e.target.checked})} />
           <label htmlFor="nfc-toggle" style={{cursor: 'pointer', fontSize: '12px'}}>
@@ -154,14 +160,18 @@ const App = () => {
         </button>
 
         {podeComprar && (
-          <button className="btn-buy" onClick={() => { setTipoForm('orcamento'); setShowModal(true); }}>
+          <button className="btn-buy" style={{marginTop: '10px'}} onClick={() => { setTipoForm('orcamento'); setShowModal(true); }}>
             🛒 FINALIZAR PEDIDO / ORÇAMENTO
           </button>
         )}
 
-        <div className="extra-buttons" style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
-          <button className="btn-secondary" onClick={() => { setTipoForm('info'); setShowModal(true); }}>ℹ️ Info</button>
-          <button className="btn-secondary" onClick={() => { setTipoForm('sugestao'); setShowModal(true); }}>💡 Sugestão</button>
+        <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
+          <button className="btn-secondary" onClick={() => { setTipoForm('info'); setShowModal(true); }}>
+            ℹ️ Info
+          </button>
+          <button className="btn-secondary" onClick={() => { setTipoForm('sugestao'); setShowModal(true); }}>
+            💡 Sugestão
+          </button>
         </div>
       </div>
 
