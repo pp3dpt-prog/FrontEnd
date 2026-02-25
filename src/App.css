@@ -5,35 +5,35 @@ body {
   overflow: hidden; /* Evita scrolls duplos */
 }
 
-/* Garante que o container principal não bloqueie o scroll */
+/* Container principal ocupa o ecrã todo */
 .app-container {
   display: flex;
   height: 100vh;
-  overflow: hidden; /* O scroll fica dentro dos sub-elementos */
+  width: 100vw;
+  overflow: hidden; /* Impede scroll na página toda, mantém nos elementos */
+  background-color: #f0f2f5;
 }
-
-/* Sidebar Técnica e Profissional */
+/* Sidebar com largura fixa e scroll próprio */
 .sidebar {
-  width: 350px;
-  height: 100vh; /* Ocupa a altura total do ecrã */
-  overflow-y: auto; /* ATIVA O SCROLL apenas na barra lateral */
-  padding: 20px;
-  background-color: #f8f9fa;
-  border-right: 1px solid #ddd;
+  width: 380px; /* Largura ideal para os controlos */
+  min-width: 380px;
+  height: 100%;
+  overflow-y: auto; /* Permite descer para ver todos os botões */
+  padding: 25px;
+  background: white;
+  box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+  z-index: 10;
 }
 
-/* O Visualizador agora é o Rei da página */
-
+/* O Visualizador 3D - Ocupa todo o resto do espaço */
 .viewport {
-  flex: 1; /* Ocupa TODO o resto do ecrã */
-  background: radial-gradient(circle, #ffffff 0%, #f1f5f9 100%);
-  border-radius: 16px;
-  border: 1px solid #e2e8f0;
+  flex-grow: 1; /* Faz o visualizador expandir e ocupar o resto da largura */
+  height: 100%;
   position: relative;
+  background: radial-gradient(circle, #ffffff 0%, #e0e0e0 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);
 }
 
 .logo-brand {

@@ -173,7 +173,7 @@ const App = () => {
       </div>
 
       <div className="viewport">
-         {stlUrl ? <Scene3D stlUrl={stlUrl} /> : <p>Configura a tua PetTag</p>}
+         {stlUrl ? <Scene3D stlUrl={stlUrl} /> : <p>Configura a tua PetTag e clica em Preview</p>}
       </div>
 
       {showModal && (
