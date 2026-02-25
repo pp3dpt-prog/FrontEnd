@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Scene3D from './components/Scene3D';
 import './App.css';
 
+
 const App = () => {
   const [config, setConfig] = useState({
     nome: 'BOBI',
@@ -15,6 +16,16 @@ const App = () => {
   const [stlUrl, setStlUrl] = useState(null);
   const [podeComprar, setPodeComprar] = useState(false);
   const API_URL = import.meta.env.VITE_API_URL;
+  const [showModal, setShowModal] = useState(false);
+  const [tipoForm, setTipoForm] = useState('orcamento'); // orcamento, info, sugestao
+
+  const [formDados, setFormDados] = useState({
+    // Dados do Dono
+    donoNome: '', donoTelefone: '', donoEmail: '', nif: '', morada: '',
+    // Ficha do Pet (NFC)
+    petRaca: '', petNascimento: '', petChip: '', petVacinas: '', 
+    petVet: '', obs: '', contactoEmergencia: ''
+    });
 
   // LÓGICA DE NEGÓCIO: Restrições de Produção
   useEffect(() => {
@@ -45,7 +56,13 @@ const App = () => {
   return (
     <div className="app-container">
       <div className="sidebar">
-        <div className="logo-brand">PP3D<span style={{color: '#3b82f6'}}>.PT</span></div>
+        <div className="logo-container" style={{textAlign: 'center', marginBottom: '20px'}}>
+          <img src="/logo_pp3d.webp" 
+          alt="PP3D.PT" 
+          style={{width: '120px', marginBottom: '10px'}} />
+          <div style={{fontWeight: 'bold', fontSize: '18px'}}>PP3D<span 
+          style={{color: '#3b82f6'}}>.PT</span></div>
+        </div>
 
         <div className="input-block">
           <label>NOME DO PET (FRENTE)</label>
@@ -97,12 +114,22 @@ const App = () => {
           {loading ? 'A GERAR MODELO...' : 'VER PREVIEW 3D'}
         </button>
 
+        <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
+          <button className="btn-secondary" onClick={() => { setTipoForm('info'); setShowModal(true); }}>
+            Pedir Informação
+          </button>
+          <button className="btn-secondary" onClick={() => { setTipoForm('sugestao'); setShowModal(true); }}>
+            Dar Sugestão
+          </button>
+        </div>
+
         {podeComprar && (
-          <button className="btn-main btn-cart" onClick={() => alert("Adicionado ao carrinho!")}>
+          <button className="btn-main btn-cart" onClick={() => alert("Obrigado pelo teu pedido!")}>
             🛒 FAZER PEDIDO
           </button>
         )}
       </div>
+    
 
       <div className="viewport">
         {loading ? (
