@@ -124,14 +124,14 @@ input[type="text"], select {
 
 .btn-main {
   width: 100%;
-  padding: 16px;
+  padding: 12px;
   background: #3b82f6;
   color: white;
   border: none;
   border-radius: 10px;
   font-weight: 700;
   cursor: pointer;
-  margin-top: auto; /* Empurra para o fim da sidebar */
+  margin-top: 10px; /* Empurra para o fim da sidebar */
 }
 
 .btn-cart {
